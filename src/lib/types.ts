@@ -23,8 +23,7 @@ export interface WSMessage {
 
 export interface RequestConfig {
   method: string
-  path: string
-  baseURL: string
+  url: string
   headers: Record<string, string>
   body: string
 }

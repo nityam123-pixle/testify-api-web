@@ -1,7 +1,7 @@
 import { RequestConfig, ResponseData } from './types'
 
 export async function sendRequest(config: RequestConfig): Promise<ResponseData> {
-  const fullURL = config.baseURL + config.path
+  const fullURL = config.url
 
   const headers: Record<string, string> = {}
   for (const [k, v] of Object.entries(config.headers || {})) {

@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { Route, StackInfo, ResponseData } from '@/lib/types'
+import { getDefaultPort } from '@/lib/utils'
 
 export interface RequestHeader {
   id: string
@@ -23,6 +24,10 @@ interface WorkspaceStore {
   // Selected route
   selectedRoute: Route | null
   setSelectedRoute: (route: Route | null) => void
+  customURL: string
+  setCustomURL: (url: string) => void
+  pathParams: Record<string, string>
+  setPathParam: (key: string, value: string) => void
 
   // Request state
   requestBody: string
@@ -64,10 +69,25 @@ export const useWorkspaceStore = create<WorkspaceStore>((set) => ({
 
   // Selected route
   selectedRoute: null,
-  setSelectedRoute: (route) => set({ 
-    selectedRoute: route,
-    requestBody: route?.body ? route.body : '',
-    response: null,
+  customURL: '',
+  pathParams: {},
+  setCustomURL: (url) => set({ customURL: url }),
+  setPathParam: (key, value) => set((state) => ({ 
+    pathParams: { ...state.pathParams, [key]: value } 
+  })),
+  setSelectedRoute: (route) => set((state) => {
+    let baseURL = 'http://localhost:3000'
+    if (state.stack) {
+      const port = state.stack.port || getDefaultPort(state.stack.framework)
+      baseURL = `http://localhost:${port}`
+    }
+    return {
+      selectedRoute: route,
+      customURL: route ? `${baseURL}${route.path}` : '',
+      pathParams: {},
+      requestBody: route?.body ? route.body : '',
+      response: null,
+    }
   }),
 
   // Request state

@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useWorkspaceStore } from '@/store/workspace'
 import { METHOD_COLORS } from '@/lib/constants'
-import { Eye, EyeOff, ChevronDown, ChevronRight, Loader2, Send, Copy, FileJson, RefreshCw, Wand2 } from 'lucide-react'
+import { Eye, EyeOff, ChevronRight, Loader2, Send, Copy, FileJson, RefreshCw, Wand2 } from 'lucide-react'
 import Editor from '@monaco-editor/react'
 import { sendRequest } from '@/lib/request'
+import { extractPathParams } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { toast } from 'sonner'
@@ -59,15 +60,12 @@ function getDefaultPort(framework?: string): string {
 }
 
 export function RequestEditor() {
-  const { selectedRoute, stack, authToken, setAuthToken, requestBody, setRequestBody, isLoading, setIsLoading, setResponse, headers } = useWorkspaceStore()
+  const { selectedRoute, authToken, setAuthToken, requestBody, setRequestBody, isLoading, setIsLoading, setResponse, headers, customURL, setCustomURL, pathParams, setPathParam } = useWorkspaceStore()
   const [showAuth, setShowAuth] = useState(false)
   const [authExpanded, setAuthExpanded] = useState(false)
   const [headersExpanded, setHeadersExpanded] = useState(false)
   const [isMac, setIsMac] = useState(false)
   const editorRef = useRef<any>(null)
-
-  const fallbackPort = getDefaultPort(stack?.framework)
-  const baseURL = stack?.port ? `http://localhost:${stack.port}` : `http://localhost:${fallbackPort}`
 
   const handleSend = useCallback(async () => {
     if (!selectedRoute) return
@@ -88,10 +86,18 @@ export function RequestEditor() {
       requestHeaders['Authorization'] = `Bearer ${authToken}`
     }
 
+    let finalURL = customURL
+    const params = extractPathParams(customURL)
+    params.forEach(p => {
+      const val = pathParams[p] || ''
+      finalURL = finalURL.replace(new RegExp(`:${p}\\b`, 'g'), val)
+      finalURL = finalURL.replace(new RegExp(`\\{${p}\\}`, 'g'), val)
+      finalURL = finalURL.replace(new RegExp(`\\[${p}\\]`, 'g'), val)
+    })
+
     const config = {
       method: selectedRoute.method,
-      path: selectedRoute.path,
-      baseURL,
+      url: finalURL,
       headers: requestHeaders,
       body: requestBody,
     }
@@ -104,7 +110,7 @@ export function RequestEditor() {
     } finally {
       setIsLoading(false)
     }
-  }, [selectedRoute, baseURL, authToken, requestBody, headers, setIsLoading, setResponse])
+  }, [selectedRoute, customURL, pathParams, authToken, requestBody, headers, setIsLoading, setResponse])
 
   const handleSendRef = useRef(handleSend)
   useEffect(() => {
@@ -135,23 +141,59 @@ export function RequestEditor() {
   return (
     <div className="flex flex-col h-full flex-1 border-r border-border bg-surface-1 min-w-[400px]">
       {/* 1. Route header bar */}
-      <div className="p-8 border-b border-border bg-surface-1/80 backdrop-blur-md sticky top-0 z-10">
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-3">
-            <span className={`px-2.5 py-1 rounded-md text-[11px] font-mono font-bold tracking-widest uppercase ${methodColorClass} bg-opacity-10`}>
+      <div className="p-6 border-b border-border bg-surface-1/80 backdrop-blur-md sticky top-0 z-10">
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center gap-3 bg-surface-2 border border-border/50 rounded-lg p-1.5 shadow-sm focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
+            <span className={`shrink-0 px-3 py-1.5 rounded-md text-[13px] font-mono font-bold tracking-widest uppercase ${methodColorClass} bg-opacity-10`}>
               {selectedRoute.method}
             </span>
-            <span className="font-mono text-foreground text-2xl font-semibold tracking-tight break-all">
-              {selectedRoute.path}
-            </span>
-          </div>
-          <div className="text-sm text-muted-foreground/80 font-mono pl-[3.5rem]">
-            {baseURL}
+            <input
+              type="text"
+              value={customURL}
+              onChange={(e) => setCustomURL(e.target.value)}
+              className="flex-1 bg-transparent border-none outline-none text-sm font-mono text-foreground placeholder:text-muted-foreground/50 px-2 min-w-0"
+              placeholder="http://localhost:3000/api/endpoint"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault()
+                  handleSendRef.current()
+                }
+              }}
+            />
           </div>
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto flex flex-col p-6 gap-6">
+        {/* 1.5 Path Params section */}
+        {(() => {
+          const params = extractPathParams(customURL)
+          if (params.length === 0) return null
+          return (
+            <motion.div layout className="flex flex-col rounded-lg bg-surface-2 overflow-hidden shadow-sm">
+              <div className="flex items-center gap-2 p-3 border-b border-border/40 bg-surface-3/30">
+                <span className="text-sm font-semibold text-foreground">Path Variables</span>
+              </div>
+              <div className="p-4 flex flex-col gap-2">
+                {params.map(p => (
+                  <div key={p} className="flex items-center gap-3">
+                    <div className="w-1/3 shrink-0 text-xs font-mono text-muted-foreground bg-surface-3 px-3 py-1.5 rounded-md border border-border/50">
+                      {p}
+                    </div>
+                    <input
+                      type="text"
+                      value={pathParams[p] || ''}
+                      onChange={(e) => setPathParam(p, e.target.value)}
+                      placeholder="value"
+                      className="flex-1 bg-surface-3/30 hover:bg-surface-3/60 focus:bg-surface-3 border border-border/50 focus:border-primary/50 rounded-md px-3 py-1.5 text-xs outline-none text-foreground font-mono transition-all"
+                    />
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )
+        })()}
+
         {/* 2. Auth section */}
         <motion.div layout className="flex flex-col rounded-lg bg-surface-2 overflow-hidden shadow-sm">
           <button

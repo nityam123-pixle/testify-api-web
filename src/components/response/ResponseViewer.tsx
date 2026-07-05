@@ -173,7 +173,7 @@ export function ResponseViewer() {
   }
 
   return (
-    <div className="flex flex-col h-full flex-1 bg-surface-1">
+    <div className="flex flex-col h-full flex-1 bg-surface-1 overflow-hidden">
       {/* Top Status Bar */}
       <div className="h-[72px] flex items-center justify-between px-8 border-b border-border shrink-0 bg-surface-1/80 backdrop-blur-md sticky top-0 z-10">
         <div className="flex items-center gap-6">
@@ -192,8 +192,8 @@ export function ResponseViewer() {
       </div>
 
       {/* Tabs Area */}
-      <div className="flex-1 overflow-hidden flex flex-col pt-6">
-        <Tabs defaultValue={isJson ? 'body' : 'raw'} className="flex-1 flex flex-col h-full w-full">
+      <div className="flex-1 overflow-hidden flex flex-col pt-6 min-h-0">
+        <Tabs defaultValue={isJson ? 'body' : 'raw'} className="flex-1 flex flex-col min-h-0 w-full">
           <div className="px-8 mb-6 shrink-0">
             <TabsList className="bg-surface-2 p-1 rounded-full border border-border inline-flex h-10 items-center justify-center gap-1 shadow-sm">
               <TabsTrigger 
@@ -217,7 +217,7 @@ export function ResponseViewer() {
             </TabsList>
           </div>
 
-          <TabsContent value="body" className="flex-1 p-0 mx-6 mb-6 mt-0 overflow-hidden relative h-[calc(100%-1.5rem)] rounded-xl border border-border bg-surface-2 shadow-sm">
+          <TabsContent value="body" className="flex-1 p-0 mx-6 mb-6 mt-0 min-h-0 relative rounded-xl border border-border bg-surface-2 shadow-sm overflow-hidden">
             <div className="absolute top-4 right-4 z-10">
               <button
                 onClick={handleCopy}
@@ -238,7 +238,7 @@ export function ResponseViewer() {
             </div>
           </TabsContent>
 
-          <TabsContent value="headers" className="flex-1 p-0 mx-6 mb-6 mt-0 overflow-hidden relative h-[calc(100%-1.5rem)]">
+          <TabsContent value="headers" className="flex-1 p-0 mx-6 mb-6 mt-0 min-h-0 relative overflow-hidden">
             <div className="w-full h-full border border-border rounded-xl bg-surface-2 overflow-hidden flex flex-col shadow-sm">
               <div className="flex bg-surface-3 border-b border-border px-4 py-2.5 text-xs font-semibold text-foreground sticky top-0">
                 <div className="w-1/3 shrink-0">Header Name</div>
@@ -258,7 +258,7 @@ export function ResponseViewer() {
             </div>
           </TabsContent>
 
-          <TabsContent value="raw" className="flex-1 p-0 mx-6 mb-6 mt-0 overflow-hidden relative h-[calc(100%-1.5rem)] rounded-xl border border-border bg-surface-2 shadow-sm">
+          <TabsContent value="raw" className="flex-1 p-0 mx-6 mb-6 mt-0 min-h-0 relative rounded-xl border border-border bg-surface-2 shadow-sm overflow-hidden">
             <div className="absolute top-4 right-4 z-10">
               <button
                 onClick={handleCopy}

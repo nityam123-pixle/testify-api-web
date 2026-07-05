@@ -10,6 +10,7 @@ interface WorkspaceStore {
   // Project data
   routes: Route[]
   stack: StackInfo | null
+  cliVersion: string
 
   // Selected route
   selectedRoute: Route | null
@@ -31,6 +32,7 @@ interface WorkspaceStore {
   setReconnectAttempt: (n: number) => void
   setRoutes: (routes: Route[]) => void
   setStack: (stack: StackInfo) => void
+  setCLIVersion: (v: string) => void
   setResponse: (resp: ResponseData | null) => void
   setIsLoading: (v: boolean) => void
   clearResponse: () => void
@@ -45,6 +47,7 @@ export const useWorkspaceStore = create<WorkspaceStore>((set) => ({
   // Project data
   routes: [],
   stack: null,
+  cliVersion: '',
 
   // Selected route
   selectedRoute: null,
@@ -70,6 +73,7 @@ export const useWorkspaceStore = create<WorkspaceStore>((set) => ({
   setReconnectAttempt: (n) => set({ reconnectAttempt: n }),
   setRoutes: (routes) => set({ routes }),
   setStack: (stack) => set({ stack }),
+  setCLIVersion: (v) => set({ cliVersion: v }),
   setResponse: (resp) => set({ response: resp }),
   setIsLoading: (v) => set({ isLoading: v }),
   clearResponse: () => set({ response: null }),

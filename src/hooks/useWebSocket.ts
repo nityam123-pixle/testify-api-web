@@ -4,7 +4,7 @@ import { WS_URL } from '@/lib/constants'
 import { WSMessage } from '@/lib/types'
 
 export function useWebSocket() {
-  const { connected, connecting, setConnected, setConnecting, setRoutes, setStack, reconnectAttempt, setReconnectAttempt } = useWorkspaceStore()
+  const { connected, connecting, setConnected, setConnecting, setRoutes, setStack, setCLIVersion, reconnectAttempt, setReconnectAttempt } = useWorkspaceStore()
   const wsRef = useRef<WebSocket | null>(null)
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -32,6 +32,7 @@ export function useWebSocket() {
         if (msg.type === 'init') {
           if (msg.routes) setRoutes(msg.routes)
           if (msg.stack) setStack(msg.stack)
+          if (msg.cliVersion) setCLIVersion(msg.cliVersion)
         } else if (msg.type === 'update') {
           if (msg.routes) setRoutes(msg.routes)
         }
@@ -58,7 +59,7 @@ export function useWebSocket() {
       setConnected(false)
       // onclose will be called shortly after onerror
     }
-  }, [setConnected, setConnecting, setRoutes, setStack, setReconnectAttempt])
+  }, [setConnected, setConnecting, setRoutes, setStack, setCLIVersion, setReconnectAttempt])
 
   useEffect(() => {
     connect()

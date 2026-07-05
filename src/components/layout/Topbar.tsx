@@ -23,7 +23,7 @@ function GithubIcon(props: React.SVGProps<SVGSVGElement>) {
 }
 
 export function Topbar() {
-  const { connected, connecting, stack, reconnectAttempt } = useWorkspaceStore()
+  const { connected, connecting, stack, cliVersion, reconnectAttempt } = useWorkspaceStore()
 
   return (
     <header className="h-14 border-b border-border bg-background flex items-center justify-between px-4 shrink-0">
@@ -34,7 +34,9 @@ export function Topbar() {
             <span className="text-sm font-medium text-foreground">
               {stack?.projectName ? `${stack.projectName} Workspace` : 'Local Workspace'}
             </span>
-            <span className="px-1.5 py-0.5 rounded-md bg-muted text-[10px] font-mono text-muted-foreground">v1.2.4</span>
+            <span className="px-1.5 py-0.5 rounded-md bg-muted text-[10px] font-mono text-muted-foreground">
+              {cliVersion ? `v${cliVersion}` : 'v1.2.5'}
+            </span>
           </div>
         </div>
       </div>

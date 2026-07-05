@@ -18,6 +18,7 @@ export interface WSMessage {
   type: 'init' | 'update' | 'response' | 'error'
   routes?: Route[]
   stack?: StackInfo
+  cliVersion?: string
 }
 
 export interface RequestConfig {

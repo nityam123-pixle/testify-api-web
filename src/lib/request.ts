@@ -2,35 +2,41 @@ import { RequestConfig, ResponseData } from './types'
 
 export async function sendRequest(config: RequestConfig): Promise<ResponseData> {
   const fullURL = config.baseURL + config.path
-  
-  const headers = new Headers(config.headers)
+
+  const headers: Record<string, string> = {}
+  for (const [k, v] of Object.entries(config.headers || {})) {
+    headers[k] = v
+  }
   if (config.body && config.body.trim() !== '') {
-    if (!headers.has('Content-Type')) {
-      headers.set('Content-Type', 'application/json')
+    if (!headers['Content-Type'] && !headers['content-type']) {
+      headers['Content-Type'] = 'application/json'
     }
   }
 
   const startTime = performance.now()
 
   try {
+    // All requests go through the Testify Go proxy (/proxy?url=...)
+    // This runs server-side so there are zero browser CORS restrictions.
+    const proxyURL = `http://localhost:7842/proxy?url=${encodeURIComponent(fullURL)}`
+
     const fetchOptions: RequestInit = {
       method: config.method.toUpperCase(),
       headers,
     }
 
-    if (fetchOptions.method !== 'GET' && fetchOptions.method !== 'HEAD' && fetchOptions.method !== 'DELETE') {
+    if (fetchOptions.method !== 'GET' && fetchOptions.method !== 'HEAD') {
       if (config.body && config.body.trim() !== '') {
         fetchOptions.body = config.body
       }
     }
 
-    const response = await fetch(fullURL, fetchOptions)
-    
+    const response = await fetch(proxyURL, fetchOptions)
+
     const duration = Math.round(performance.now() - startTime)
-    
+
     const bodyText = await response.text()
-    
-    // Calculate size in bytes
+
     const size = new Blob([bodyText]).size
 
     const responseHeaders: Record<string, string> = {}

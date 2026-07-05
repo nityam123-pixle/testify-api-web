@@ -31,8 +31,10 @@ export function Topbar() {
         <div className="flex items-center gap-3">
           <img src="/ascii-logo.svg" alt="Testify ASCII Logo" className="h-5 w-auto object-contain brightness-110" />
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-foreground">Local Workspace</span>
-            <span className="px-1.5 py-0.5 rounded-md bg-muted text-[10px] font-mono text-muted-foreground">v1.1.0</span>
+            <span className="text-sm font-medium text-foreground">
+              {stack?.projectName ? `${stack.projectName} Workspace` : 'Local Workspace'}
+            </span>
+            <span className="px-1.5 py-0.5 rounded-md bg-muted text-[10px] font-mono text-muted-foreground">v1.2.4</span>
           </div>
         </div>
       </div>

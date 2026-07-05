@@ -9,6 +9,7 @@ export interface StackInfo {
   framework: string
   language: string
   port: string
+  projectName: string
   hasConvex: boolean
   hasDotEnv: boolean
 }

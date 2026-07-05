@@ -1,36 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<img src="public/ascii-logo.svg" alt="Testify ASCII Logo" />
 
-## Getting Started
+# Testify API Web (Phase 5)
 
-First, run the development server:
+**The Web Dashboard for the Testify CLI.**
+
+![License](https://img.shields.io/badge/License-Apache%202.0-blue?style=flat-square)
+![Next.js](https://img.shields.io/badge/Next.js-15.0-black?style=flat-square&logo=next.js)
+![React](https://img.shields.io/badge/React-19.0-61DAFB?style=flat-square&logo=react)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v4-38B2AC?style=flat-square&logo=tailwind-css)
+
+This is the Next.js frontend application that powers the **Testify Web Dashboard**. 
+It connects seamlessly to the WebSocket server running inside the [Testify CLI](https://github.com/nityam123-pixle/testify-cli).
+
+## Architecture
+
+*   **Next.js (App Router)**: The core framework for the application.
+*   **Tailwind CSS (v4)**: Utilized for all styling, combined with a custom design token system in `globals.css` (Surface elevations 0-3).
+*   **Zustand**: A lightweight, fast state management library used (`src/store/workspace.ts`) to manage routes, the active request, and responses.
+*   **Framer Motion**: Powers the buttery-smooth micro-interactions, layout transitions, and accordion animations.
+*   **Shadcn/UI**: Provides accessible, premium foundational UI components (Dialogs, Accordions, Tabs, Buttons).
+*   **Monaco Editor**: Integrated for the JSON Request Body editor with a custom `testify-dark` theme.
+
+## How it works
+
+This Next.js application is designed to be exported as a static bundle (`output: 'export'`). 
+The resulting `out/` directory is then fully embedded into the `testify-cli` Go binary using `//go:embed`.
+
+This means end-users never have to run this Next.js app themselves. They simply download the Go binary and run:
+```bash
+testify ui
+```
+Which spins up the local Go server and serves this very Next.js application!
+
+## Development
+
+If you want to contribute to the frontend UI or test changes:
+
+1.  **Start the Testify CLI Backend**:
+    Navigate to your API backend project (e.g. an Express or Next.js app) and run the CLI in UI mode:
+    ```bash
+    testify ui
+    ```
+    This starts the local Testify server on port `7842`.
+
+2.  **Run the Next.js Dev Server**:
+    In a separate terminal window, navigate to this repository and start the development server:
+    ```bash
+    npm install
+    npm run dev
+    ```
+    Open [http://localhost:3000](http://localhost:3000) with your browser. The Web UI will connect to the CLI's WebSocket at `ws://localhost:7842/ws`.
+
+## Build & Export
+
+To build the static export for the CLI:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run build
 ```
+The static assets will be generated in the `out/` directory, ready to be copied into the CLI repository.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## License
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is licensed under the **Apache License 2.0**. See the [LICENSE](LICENSE) file for details.

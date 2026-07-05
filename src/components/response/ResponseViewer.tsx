@@ -245,12 +245,54 @@ export function ResponseViewer() {
                 <div className="w-2/3">Value</div>
               </div>
               <div className="overflow-y-auto flex-1">
-                {Object.entries(response.headers).map(([key, value]) => (
-                  <div key={key} className="flex px-4 py-2.5 border-b border-border/50 last:border-0 hover:bg-surface-3/30 transition-colors">
-                    <div className="w-1/3 text-muted-foreground text-xs font-mono shrink-0 break-all">{key}</div>
-                    <div className="w-2/3 text-foreground text-xs font-mono break-all">{value}</div>
-                  </div>
-                ))}
+                {Object.entries(response.headers).map(([key, value]) => {
+                  const isSetCookie = key.toLowerCase() === 'set-cookie'
+                  return (
+                    <div key={key} className="flex px-4 py-2.5 border-b border-border/50 last:border-0 hover:bg-surface-3/30 transition-colors group">
+                      <div className="w-1/3 text-muted-foreground text-xs font-mono shrink-0 break-all pt-0.5">{key}</div>
+                      <div className="w-2/3 text-foreground text-xs font-mono break-all relative">
+                        {value}
+                        {isSetCookie && (
+                          <button
+                            onClick={() => {
+                              const store = useWorkspaceStore.getState()
+                              // Set-Cookie value often looks like: "better-auth.session_token=XYZ; Max-Age=..."
+                              // We just want to extract the first key=value part
+                              const cookiePart = value.split(';')[0]
+                              
+                              // Check if we already have a Cookie header
+                              const existingCookie = store.headers.find(h => h.key.toLowerCase() === 'cookie')
+                              if (existingCookie) {
+                                // Append or replace? Let's just append with a semicolon if it doesn't already contain it
+                                const newValue = existingCookie.value 
+                                  ? (existingCookie.value.includes(cookiePart.split('=')[0]) 
+                                      ? existingCookie.value // don't append if it seems to have it already, or maybe replace? Just append for simplicity if not exact match
+                                      : `${existingCookie.value}; ${cookiePart}`)
+                                  : cookiePart
+                                store.updateHeader(existingCookie.id, { value: newValue, enabled: true })
+                              } else {
+                                store.addHeader()
+                                // The new header will be the last one
+                                setTimeout(() => {
+                                  const currentHeaders = useWorkspaceStore.getState().headers
+                                  const last = currentHeaders[currentHeaders.length - 1]
+                                  if (last) {
+                                    store.updateHeader(last.id, { key: 'Cookie', value: cookiePart, enabled: true })
+                                  }
+                                }, 10)
+                              }
+                              toast.success('Added to Request Headers')
+                            }}
+                            className="absolute -top-1 -right-2 opacity-0 group-hover:opacity-100 px-2 py-1 bg-primary/20 hover:bg-primary/30 text-primary rounded-md text-[10px] font-bold transition-all border border-primary/20 shadow-sm"
+                            title="Use this cookie in your next request"
+                          >
+                            Use Cookie
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
                 {Object.keys(response.headers).length === 0 && (
                   <div className="p-8 text-sm text-muted-foreground italic text-center">No headers received</div>
                 )}

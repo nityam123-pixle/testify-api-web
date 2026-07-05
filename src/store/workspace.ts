@@ -1,6 +1,14 @@
 import { create } from 'zustand'
 import { Route, StackInfo, ResponseData } from '@/lib/types'
 
+export interface RequestHeader {
+  id: string
+  key: string
+  value: string
+  enabled: boolean
+}
+
+
 interface WorkspaceStore {
   // Connection
   connected: boolean
@@ -21,6 +29,11 @@ interface WorkspaceStore {
   setRequestBody: (body: string) => void
   authToken: string
   setAuthToken: (token: string) => void
+  headers: RequestHeader[]
+  setHeaders: (headers: RequestHeader[]) => void
+  addHeader: () => void
+  updateHeader: (id: string, updates: Partial<RequestHeader>) => void
+  removeHeader: (id: string) => void
 
   // Response state
   response: ResponseData | null
@@ -62,6 +75,17 @@ export const useWorkspaceStore = create<WorkspaceStore>((set) => ({
   setRequestBody: (body) => set({ requestBody: body }),
   authToken: '',
   setAuthToken: (token) => set({ authToken: token }),
+  headers: [],
+  setHeaders: (headers) => set({ headers }),
+  addHeader: () => set((state) => ({
+    headers: [...state.headers, { id: crypto.randomUUID(), key: '', value: '', enabled: true }]
+  })),
+  updateHeader: (id, updates) => set((state) => ({
+    headers: state.headers.map((h) => (h.id === id ? { ...h, ...updates } : h))
+  })),
+  removeHeader: (id) => set((state) => ({
+    headers: state.headers.filter((h) => h.id !== id)
+  })),
 
   // Response state
   response: null,

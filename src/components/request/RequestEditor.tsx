@@ -7,6 +7,7 @@ import { sendRequest } from '@/lib/request'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { toast } from 'sonner'
+import { HeadersEditor } from './HeadersEditor'
 
 function getDefaultPort(framework?: string): string {
   switch (framework) {
@@ -58,7 +59,7 @@ function getDefaultPort(framework?: string): string {
 }
 
 export function RequestEditor() {
-  const { selectedRoute, stack, authToken, setAuthToken, requestBody, setRequestBody, isLoading, setIsLoading, setResponse } = useWorkspaceStore()
+  const { selectedRoute, stack, authToken, setAuthToken, requestBody, setRequestBody, isLoading, setIsLoading, setResponse, headers } = useWorkspaceStore()
   const [showAuth, setShowAuth] = useState(false)
   const [authExpanded, setAuthExpanded] = useState(false)
   const [headersExpanded, setHeadersExpanded] = useState(false)
@@ -73,16 +74,25 @@ export function RequestEditor() {
 
     setIsLoading(true)
 
-    const headers: Record<string, string> = {}
+    const requestHeaders: Record<string, string> = {}
+    
+    // Add custom enabled headers first
+    headers.forEach(h => {
+      if (h.enabled && h.key.trim() !== '') {
+        requestHeaders[h.key] = h.value
+      }
+    })
+
+    // Auth token takes precedence if set in the auth panel
     if (authToken) {
-      headers['Authorization'] = `Bearer ${authToken}`
+      requestHeaders['Authorization'] = `Bearer ${authToken}`
     }
 
     const config = {
       method: selectedRoute.method,
       path: selectedRoute.path,
       baseURL,
-      headers,
+      headers: requestHeaders,
       body: requestBody,
     }
 
@@ -94,7 +104,7 @@ export function RequestEditor() {
     } finally {
       setIsLoading(false)
     }
-  }, [selectedRoute, baseURL, authToken, requestBody, setIsLoading, setResponse])
+  }, [selectedRoute, baseURL, authToken, requestBody, headers, setIsLoading, setResponse])
 
   const handleSendRef = useRef(handleSend)
   useEffect(() => {
@@ -203,7 +213,9 @@ export function RequestEditor() {
               </motion.div>
               <span className="text-sm font-semibold text-foreground">Headers</span>
             </div>
-            <span className="text-xs font-mono text-muted-foreground bg-surface-3 px-2 py-0.5 rounded-full border border-border">1 hidden</span>
+            <span className="text-xs font-mono text-muted-foreground bg-surface-3 px-2 py-0.5 rounded-full border border-border">
+              {headers.filter(h => h.enabled && h.key).length} active
+            </span>
           </button>
           
           <AnimatePresence initial={false}>
@@ -215,12 +227,7 @@ export function RequestEditor() {
                 transition={{ duration: 0.2 }}
               >
                 <div className="p-4 pt-0 border-t border-border/40">
-                  <div className="bg-[#111111] border border-border/30 rounded-lg p-3 font-mono text-xs mt-2 overflow-x-auto">
-                    <div className="flex">
-                      <span className="text-cyan-400 w-32 shrink-0">Content-Type:</span>
-                      <span className="text-green-400">application/json</span>
-                    </div>
-                  </div>
+                  <HeadersEditor />
                 </div>
               </motion.div>
             )}

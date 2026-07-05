@@ -12,6 +12,17 @@
 This is the Next.js frontend application that powers the **Testify Web Dashboard**. 
 It connects seamlessly to the WebSocket server running inside the [Testify CLI](https://github.com/nityam123-pixle/testify-cli).
 
+## Key Features
+
+- **Modern Web Dashboard**: A sleek, fully-featured Next.js frontend with dark mode styling and buttery-smooth Framer Motion animations.
+- **Advanced Request Editor**:
+  - Fully editable API URLs and base ports
+  - Dynamic Path Parameters detection (`:id`, `{uid}`) that automatically maps input fields to the URL
+  - Comprehensive Headers management with intelligent Autocomplete
+  - Automatic Cookie Extraction ("Use Cookie" button parses `Set-Cookie` responses)
+- **Code Editor**: Monaco Editor integration with a custom `testify-dark` theme for JSON request bodies.
+- **State Management**: Built on Zustand for instant UI updates and seamless WebSocket synchronization with the CLI engine.
+
 ## Architecture
 
 *   **Next.js (App Router)**: The core framework for the application.

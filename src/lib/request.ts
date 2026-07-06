@@ -51,6 +51,7 @@ export async function sendRequest(config: RequestConfig): Promise<ResponseData> 
       headers: responseHeaders,
       duration,
       size,
+      httpVersion: responseHeaders['x-http-version'] || 'HTTP/1.1',
     }
   } catch (error: any) {
     const duration = Math.round(performance.now() - startTime)

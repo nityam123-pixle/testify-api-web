@@ -35,4 +35,5 @@ export interface ResponseData {
   headers: Record<string, string>
   duration: number
   size: number
+  httpVersion?: string
 }

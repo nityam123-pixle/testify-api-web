@@ -63,7 +63,7 @@ export function RequestEditor() {
   const { selectedRoute, authToken, setAuthToken, requestBody, setRequestBody, isLoading, setIsLoading, setResponse, headers, customURL, setCustomURL, pathParams, setPathParam } = useWorkspaceStore()
   const [showAuth, setShowAuth] = useState(false)
   const [authExpanded, setAuthExpanded] = useState(false)
-  const [headersExpanded, setHeadersExpanded] = useState(false)
+  const [headersExpanded, setHeadersExpanded] = useState(true)
   const [isMac, setIsMac] = useState(false)
   const editorRef = useRef<any>(null)
 

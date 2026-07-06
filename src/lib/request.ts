@@ -36,22 +36,60 @@ export async function sendRequest(config: RequestConfig): Promise<ResponseData> 
     const duration = Math.round(performance.now() - startTime)
 
     const bodyText = await response.text()
-
     const size = new Blob([bodyText]).size
 
-    const responseHeaders: Record<string, string> = {}
-    response.headers.forEach((value, key) => {
-      responseHeaders[key] = value
-    })
+    // ── Read the tunnelled headers from the Go proxy ──────────────────────────
+    // The proxy sends two special headers:
+    //
+    //   X-Testify-Response-Headers  — JSON map of ALL original response headers
+    //                                 (including Set-Cookie which the browser's
+    //                                 Fetch API silently drops on cross-origin
+    //                                 responses).
+    //
+    //   X-Testify-Proto             — The actual HTTP version string from Go's
+    //                                 http.Response.Proto ("HTTP/1.1", "HTTP/2.0"…)
+    //
+    // We prefer these over the browser's response.headers which are incomplete.
+
+    let displayHeaders: Record<string, string> = {}
+
+    const tunnelled = response.headers.get('x-testify-response-headers')
+    if (tunnelled) {
+      try {
+        // The tunnelled value is JSON: { "Header-Name": ["value1", "value2"] }
+        // We flatten multi-value headers to a single comma-joined string,
+        // matching the standard HTTP representation.
+        const raw: Record<string, string[]> = JSON.parse(tunnelled)
+        for (const [key, values] of Object.entries(raw)) {
+          // Skip the proxy's own meta-headers from the display
+          const lower = key.toLowerCase()
+          if (lower === 'x-testify-response-headers' || lower === 'x-testify-proto') continue
+          displayHeaders[key] = values.join(', ')
+        }
+      } catch {
+        // Fallback: use whatever the browser exposes
+        response.headers.forEach((value, key) => {
+          displayHeaders[key] = value
+        })
+      }
+    } else {
+      // Old proxy version — use browser headers
+      response.headers.forEach((value, key) => {
+        displayHeaders[key] = value
+      })
+    }
+
+    // Real HTTP version from the proxy (e.g. "HTTP/1.1", "HTTP/2.0")
+    const httpVersion = response.headers.get('x-testify-proto') || 'HTTP/1.1'
 
     return {
       status: response.status,
       statusText: response.statusText,
       body: bodyText,
-      headers: responseHeaders,
+      headers: displayHeaders,
       duration,
       size,
-      httpVersion: responseHeaders['x-http-version'] || 'HTTP/1.1',
+      httpVersion,
     }
   } catch (error: any) {
     const duration = Math.round(performance.now() - startTime)

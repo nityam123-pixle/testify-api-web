@@ -20,8 +20,8 @@ export const FRAMEWORK_GROUPS: LanguageGroup[] = [
     frameworks: [
       { name: 'NestJS', verified: true, status: 'VERIFIED', description: 'Progressive Node.js framework', icon: getIcon('NestJS') },
       { name: 'Next.js', verified: true, status: 'VERIFIED', description: 'React Fullstack Framework', icon: getIcon('Next.js') },
-      { name: 'Express', verified: false, status: 'PATTERN', description: 'Minimal web framework', icon: getIcon('Express') },
-      { name: 'Fastify', verified: false, status: 'PATTERN', description: 'High performance web framework', icon: getIcon('Fastify') },
+      { name: 'Express', verified: true, status: 'VERIFIED', description: 'Minimal web framework', icon: getIcon('Express') },
+      { name: 'Fastify', verified: true, status: 'VERIFIED', description: 'High performance web framework', icon: getIcon('Fastify') },
       { name: 'Hono', verified: false, status: 'PATTERN', description: 'Ultrafast web framework', icon: getIcon('Hono') },
       { name: 'Koa', verified: false, status: 'PATTERN', description: 'Expressive middleware framework', icon: getIcon('Koa') },
       { name: 'AdonisJS', verified: false, status: 'PATTERN', description: 'Fullstack MVC framework', icon: getIcon('AdonisJS') },
@@ -37,7 +37,7 @@ export const FRAMEWORK_GROUPS: LanguageGroup[] = [
   {
     language: 'Bun',
     frameworks: [
-      { name: 'Elysia', verified: false, status: 'PATTERN', description: 'Fast and elegant Web Framework', icon: getIcon('Elysia') }
+      { name: 'Elysia', verified: true, status: 'VERIFIED', description: 'Fast and elegant Web Framework', icon: getIcon('Elysia') }
     ],
   },
   {
@@ -56,8 +56,8 @@ export const FRAMEWORK_GROUPS: LanguageGroup[] = [
   {
     language: 'Go',
     frameworks: [
-      { name: 'Gin', verified: false, status: 'PATTERN', description: 'Fast HTTP web framework', icon: getIcon('Gin') },
-      { name: 'Echo', verified: false, status: 'PATTERN', description: 'High performance, minimalist framework', icon: getIcon('Echo') },
+      { name: 'Gin', verified: true, status: 'VERIFIED', description: 'Fast HTTP web framework', icon: getIcon('Gin') },
+      { name: 'Echo', verified: true, status: 'VERIFIED', description: 'High performance, minimalist framework', icon: getIcon('Echo') },
       { name: 'Fiber', verified: false, status: 'PATTERN', description: 'Express inspired web framework', icon: getIcon('Fiber') },
       { name: 'Chi', verified: false, status: 'PATTERN', description: 'Lightweight, idiomatic router', icon: getIcon('Chi') },
       { name: 'HttpRouter', verified: false, status: 'PATTERN', description: 'High performance HTTP request router', icon: getIcon('HttpRouter') },

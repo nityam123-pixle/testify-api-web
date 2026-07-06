@@ -22,7 +22,9 @@ export async function sendRequest(config: RequestConfig): Promise<ResponseData> 
 
     const fetchOptions: RequestInit = {
       method: config.method.toUpperCase(),
-      headers,
+      headers: {
+        'X-Testify-Request-Headers': JSON.stringify(headers)
+      },
     }
 
     if (fetchOptions.method !== 'GET' && fetchOptions.method !== 'HEAD') {

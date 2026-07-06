@@ -23,7 +23,17 @@ function GithubIcon(props: React.SVGProps<SVGSVGElement>) {
 }
 
 export function Topbar() {
-  const { connected, connecting, stack, cliVersion, reconnectAttempt } = useWorkspaceStore()
+  const { connected, connecting, stack, cliVersion, reconnectAttempt, customURL } = useWorkspaceStore()
+
+  let displayPort = stack?.port
+  if (customURL) {
+    try {
+      const u = new URL(customURL)
+      if (u.port) {
+        displayPort = u.port
+      }
+    } catch (e) {}
+  }
 
   return (
     <header className="h-14 border-b border-border bg-background flex items-center justify-between px-4 shrink-0">
@@ -76,7 +86,7 @@ export function Topbar() {
               <div className="flex items-center gap-2">
                 <span className="text-xs text-muted-foreground font-mono">{stack.framework}</span>
                 <span className="text-xs text-muted-foreground font-mono">·</span>
-                <span className="text-xs text-foreground font-mono font-medium">:{stack.port}</span>
+                <span className="text-xs text-foreground font-mono font-medium">:{displayPort}</span>
               </div>
             </>
           )}

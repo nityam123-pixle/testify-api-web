@@ -1,86 +1,125 @@
 import { useState, useRef, useEffect } from 'react'
 import { Plus, Trash2 } from 'lucide-react'
 import { RequestHeader, useWorkspaceStore } from '@/store/workspace'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Command, CommandGroup, CommandItem, CommandList } from '@/components/ui/command'
 
-const COMMON_HEADERS = [
-  'Accept', 'Accept-Charset', 'Accept-Encoding', 'Accept-Language',
-  'Authorization', 'Cache-Control', 'Connection', 'Content-Encoding',
-  'Content-Length', 'Content-MD5', 'Content-Type', 'Cookie', 'Date',
-  'Expect', 'Forwarded', 'From', 'Host', 'If-Match', 'If-Modified-Since',
-  'If-None-Match', 'If-Range', 'If-Unmodified-Since', 'Max-Forwards',
-  'Origin', 'Pragma', 'Proxy-Authorization', 'Range', 'Referer', 'TE',
-  'User-Agent', 'Upgrade', 'Via', 'Warning', 'X-Requested-With',
-  'X-Forwarded-For', 'X-Forwarded-Host', 'X-Forwarded-Proto',
-  'X-CSRF-Token', 'X-XSRF-TOKEN', 'X-CSRFToken', 'X-Csrf-Token',
-  'X-Api-Key', 'X-Auth-Token',
-]
-
-// Quick-add chips for frequently used headers
-const QUICK_ADD_HEADERS: { label: string; key: string; defaultValue: string; color: string }[] = [
-  { label: 'Cookie', key: 'Cookie', defaultValue: '', color: 'bg-amber-500/15 text-amber-400 border-amber-500/20 hover:bg-amber-500/25' },
-  { label: 'Authorization', key: 'Authorization', defaultValue: 'Bearer ', color: 'bg-blue-500/15 text-blue-400 border-blue-500/20 hover:bg-blue-500/25' },
-  { label: 'Content-Type', key: 'Content-Type', defaultValue: 'application/json', color: 'bg-purple-500/15 text-purple-400 border-purple-500/20 hover:bg-purple-500/25' },
-  { label: 'Accept', key: 'Accept', defaultValue: 'application/json', color: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/25' },
-  { label: 'X-Api-Key', key: 'X-Api-Key', defaultValue: '', color: 'bg-primary/15 text-primary border-primary/20 hover:bg-primary/25' },
+// Exhaustive list of all standard + widely-used HTTP request headers
+// Sourced from IANA HTTP Field Name Registry + MDN + common frameworks
+const ALL_REQUEST_HEADERS = [
+  // Standard request headers (RFC 7230-7235, RFC 9110-9114)
+  'A-IM',
+  'Accept',
+  'Accept-Charset',
+  'Accept-Datetime',
+  'Accept-Encoding',
+  'Accept-Language',
+  'Accept-Ranges',
+  'Access-Control-Request-Headers',
+  'Access-Control-Request-Method',
+  'Authorization',
+  'Cache-Control',
+  'Connection',
+  'Content-Encoding',
+  'Content-Length',
+  'Content-MD5',
+  'Content-Type',
+  'Cookie',
+  'Date',
+  'DNT',
+  'Expect',
+  'Forwarded',
+  'From',
+  'Host',
+  'HTTP2-Settings',
+  'If-Match',
+  'If-Modified-Since',
+  'If-None-Match',
+  'If-Range',
+  'If-Unmodified-Since',
+  'Max-Forwards',
+  'Origin',
+  'Pragma',
+  'Prefer',
+  'Proxy-Authorization',
+  'Range',
+  'Referer',
+  'Save-Data',
+  'TE',
+  'Trailer',
+  'Transfer-Encoding',
+  'Upgrade',
+  'Upgrade-Insecure-Requests',
+  'User-Agent',
+  'Via',
+  'Warning',
+  // Security / CSRF
+  'X-CSRF-Token',
+  'X-CSRFToken',
+  'X-Csrf-Token',
+  'X-XSRF-TOKEN',
+  // Common non-standard / de-facto headers
+  'X-Forwarded-For',
+  'X-Forwarded-Host',
+  'X-Forwarded-Proto',
+  'X-HTTP-Method-Override',
+  'X-Requested-With',
+  'X-Real-IP',
+  'X-Request-ID',
+  'X-Correlation-ID',
+  'X-Trace-ID',
+  'X-B3-TraceId',
+  'X-B3-SpanId',
+  'X-B3-ParentSpanId',
+  'X-B3-Flags',
+  'X-B3-Sampled',
+  // API / Auth
+  'X-Api-Key',
+  'X-API-Key',
+  'X-Auth-Token',
+  'X-Access-Token',
+  'X-Client-ID',
+  'X-Client-Secret',
+  'X-Tenant-ID',
+  'X-Workspace-ID',
+  'X-Organization-ID',
+  // Content negotiation
+  'X-Content-Type-Options',
+  'X-Requested-With',
+  // Rate limiting / retry hints
+  'X-Rate-Limit-Limit',
+  'X-Rate-Limit-Remaining',
+  'X-Rate-Limit-Reset',
+  'Retry-After',
+  // Framework-specific
+  'X-Amz-Date',
+  'X-Amz-Content-SHA256',
+  'X-Amz-Security-Token',
+  'X-Goog-Api-Key',
+  'X-Firebase-Auth',
+  'baggage',
+  'traceparent',
+  'tracestate',
 ]
 
 export function HeadersEditor() {
   const { headers, addHeader, updateHeader, removeHeader } = useWorkspaceStore()
 
-  // If empty, add a default empty row
   useEffect(() => {
     if (headers.length === 0) {
       addHeader()
     }
   }, [headers.length, addHeader])
 
-  const handleQuickAdd = (key: string, defaultValue: string) => {
-    // If header already exists, focus it instead
-    const existing = headers.find(h => h.key.toLowerCase() === key.toLowerCase())
-    if (existing) {
-      toast_noop(key)
-      return
-    }
-    addHeader()
-    setTimeout(() => {
-      const currentHeaders = useWorkspaceStore.getState().headers
-      const last = currentHeaders[currentHeaders.length - 1]
-      if (last) updateHeader(last.id, { key, value: defaultValue, enabled: true })
-    }, 10)
-  }
-
   return (
-    <div className="flex flex-col gap-3 mt-2">
-      {/* Quick-add chips */}
-      <div className="flex flex-wrap gap-1.5">
-        {QUICK_ADD_HEADERS.map(q => {
-          const alreadyAdded = headers.some(h => h.key.toLowerCase() === q.key.toLowerCase() && h.enabled)
-          return (
-            <button
-              key={q.key}
-              onClick={() => handleQuickAdd(q.key, q.defaultValue)}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all ${q.color} ${alreadyAdded ? 'opacity-40 cursor-default' : 'cursor-pointer'}`}
-              disabled={alreadyAdded}
-              title={alreadyAdded ? `${q.key} already added` : `Quick add ${q.key}`}
-            >
-              {!alreadyAdded && <Plus className="h-2.5 w-2.5" />}
-              {q.label}
-            </button>
-          )
-        })}
-      </div>
-
+    <div className="flex flex-col gap-2 mt-2">
       {/* Column heading */}
       <div className="flex bg-surface-3/50 border border-border/50 rounded-t-md px-3 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
-        <div className="w-8 shrink-0" />
-        <div className="w-[40%] shrink-0">Key</div>
+        <div className="w-7 shrink-0" />
+        <div className="w-[38%] shrink-0">Key</div>
         <div className="flex-1">Value</div>
-        <div className="w-8 shrink-0" />
+        <div className="w-7 shrink-0" />
       </div>
 
-      {/* Header rows */}
+      {/* Rows */}
       <div className="flex flex-col gap-1.5">
         {headers.map((header, idx) => (
           <HeaderRow
@@ -96,7 +135,7 @@ export function HeadersEditor() {
 
       <button
         onClick={addHeader}
-        className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground py-2 px-1 w-fit transition-colors"
+        className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground py-2 px-1 w-fit transition-colors mt-1"
       >
         <Plus className="h-3.5 w-3.5" />
         Add Header
@@ -104,9 +143,6 @@ export function HeadersEditor() {
     </div>
   )
 }
-
-// no-op toast hint (avoids import)
-function toast_noop(_key: string) {}
 
 function HeaderRow({ header, isLast, onUpdate, onRemove, onAdd }: {
   header: RequestHeader
@@ -117,10 +153,29 @@ function HeaderRow({ header, isLast, onUpdate, onRemove, onAdd }: {
 }) {
   const [open, setOpen] = useState(false)
   const valueRef = useRef<HTMLInputElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  // Filter: if nothing typed, show all; if typed, fuzzy-match
+  const query = header.key.toLowerCase()
+  const suggestions = query.length === 0
+    ? ALL_REQUEST_HEADERS
+    : ALL_REQUEST_HEADERS.filter(h => h.toLowerCase().includes(query))
 
   const handleKeyDown = (e: React.KeyboardEvent, field: 'key' | 'value') => {
+    if (e.key === 'Escape') {
+      setOpen(false)
+      return
+    }
     if (e.key === 'Enter') {
       e.preventDefault()
+      if (open && suggestions.length > 0) {
+        // Select top suggestion
+        onUpdate({ key: suggestions[0] })
+        setOpen(false)
+        setTimeout(() => valueRef.current?.focus(), 30)
+        return
+      }
       if (field === 'key') {
         valueRef.current?.focus()
       } else if (isLast) {
@@ -133,108 +188,120 @@ function HeaderRow({ header, isLast, onUpdate, onRemove, onAdd }: {
     }
   }
 
-  const filteredHeaders = COMMON_HEADERS.filter(h =>
-    h.toLowerCase().includes(header.key.toLowerCase()) && header.key.length > 0
-  )
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    if (open) document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [open])
 
-  // Determine value placeholder based on key
+  // Context-aware placeholder for the value field
   const valuePlaceholder = (() => {
     const k = header.key.toLowerCase()
-    if (k === 'cookie') return 'session_token=abc123; other_cookie=xyz'
+    if (k === 'cookie') return 'session=abc123; csrf=xyz'
     if (k === 'authorization') return 'Bearer <token>'
     if (k === 'content-type') return 'application/json'
-    if (k === 'accept') return 'application/json'
+    if (k === 'accept') return '*/* or application/json'
     if (k === 'origin') return 'http://localhost:3000'
-    if (k === 'x-api-key') return '<your-api-key>'
-    if (k === 'x-csrf-token' || k === 'x-xsrf-token') return '<csrf-token>'
+    if (k === 'x-api-key' || k === 'x-api-key') return '<your-api-key>'
+    if (k.includes('csrf') || k.includes('xsrf')) return '<csrf-token>'
+    if (k === 'referer' || k === 'referrer') return 'https://example.com'
+    if (k === 'user-agent') return 'MyApp/1.0'
+    if (k === 'host') return 'api.example.com'
+    if (k === 'range') return 'bytes=0-1023'
+    if (k === 'cache-control') return 'no-cache'
     return 'value'
   })()
 
-  // Color coding for well-known keys
-  const keyColor = (() => {
-    const k = header.key.toLowerCase()
-    if (k === 'cookie') return 'text-amber-400'
-    if (k === 'authorization') return 'text-blue-400'
-    if (k === 'content-type') return 'text-purple-400'
-    if (k === 'accept') return 'text-emerald-400'
-    return ''
-  })()
-
   return (
-    <div className="flex items-center gap-1.5 group">
-      {/* Enabled checkbox */}
-      <div className="w-8 shrink-0 flex justify-center">
+    <div ref={containerRef} className="flex items-center gap-1.5 group relative">
+      {/* Checkbox */}
+      <div className="w-7 shrink-0 flex justify-center">
         <input
           type="checkbox"
           checked={header.enabled}
           onChange={(e) => onUpdate({ enabled: e.target.checked })}
-          className="accent-primary w-3.5 h-3.5 rounded-sm bg-surface-3 border-border/50 cursor-pointer"
+          className="accent-primary w-3.5 h-3.5 cursor-pointer"
         />
       </div>
 
-      {/* Key with autocomplete */}
-      <div className="w-[40%] shrink-0 relative">
-        <Popover open={open && filteredHeaders.length > 0} onOpenChange={setOpen}>
-          <PopoverTrigger render={<div className="w-full relative" />}>
-            <input
-              type="text"
-              value={header.key}
-              onChange={(e) => {
-                onUpdate({ key: e.target.value })
-                setOpen(true)
-              }}
-              onFocus={() => setOpen(true)}
-              onKeyDown={(e) => handleKeyDown(e, 'key')}
-              placeholder="Key"
-              className={`w-full bg-surface-3/30 hover:bg-surface-3/60 focus:bg-surface-3 border border-border/50 focus:border-primary/50 rounded-md px-3 py-1.5 text-xs outline-none font-mono transition-all placeholder:text-muted-foreground/50 placeholder:font-sans ${keyColor || 'text-foreground'}`}
-            />
-          </PopoverTrigger>
-          <PopoverContent className="w-[220px] p-0" align="start">
-            <Command>
-              <CommandList>
-                <CommandGroup>
-                  {filteredHeaders.slice(0, 8).map((h) => (
-                    <CommandItem
-                      key={h}
-                      value={h}
-                      onSelect={() => {
-                        onUpdate({ key: h })
-                        setOpen(false)
-                        setTimeout(() => valueRef.current?.focus(), 50)
-                      }}
-                      className="font-mono text-xs cursor-pointer"
-                    >
-                      {h}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </CommandList>
-            </Command>
-          </PopoverContent>
-        </Popover>
+      {/* Key input + dropdown */}
+      <div className="w-[38%] shrink-0 relative">
+        <input
+          ref={inputRef}
+          type="text"
+          value={header.key}
+          onChange={(e) => {
+            onUpdate({ key: e.target.value })
+            setOpen(true)
+          }}
+          onFocus={() => setOpen(true)}
+          onKeyDown={(e) => handleKeyDown(e, 'key')}
+          placeholder="Key"
+          autoComplete="off"
+          spellCheck={false}
+          className="w-full bg-surface-3/30 hover:bg-surface-3/60 focus:bg-surface-3 border border-border/50 focus:border-primary/50 rounded-md px-3 py-1.5 text-xs outline-none text-foreground font-mono transition-all placeholder:text-muted-foreground/50 placeholder:font-sans"
+        />
+
+        {/* Dropdown list */}
+        {open && suggestions.length > 0 && (
+          <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-surface-2 border border-border rounded-md shadow-xl overflow-hidden">
+            <div className="max-h-[200px] overflow-y-auto">
+              {suggestions.slice(0, 20).map((h) => (
+                <button
+                  key={h}
+                  type="button"
+                  onMouseDown={(e) => {
+                    e.preventDefault()
+                    onUpdate({ key: h })
+                    setOpen(false)
+                    setTimeout(() => valueRef.current?.focus(), 30)
+                  }}
+                  className="w-full text-left px-3 py-1.5 text-xs font-mono text-foreground hover:bg-primary/20 hover:text-primary transition-colors flex items-center gap-2"
+                >
+                  <span className="flex-1 truncate">{h}</span>
+                  {h.toLowerCase() === query && (
+                    <span className="text-[10px] text-muted-foreground/60 shrink-0">exact</span>
+                  )}
+                </button>
+              ))}
+              {suggestions.length > 20 && (
+                <div className="px-3 py-1.5 text-[10px] text-muted-foreground border-t border-border/50">
+                  +{suggestions.length - 20} more — keep typing to filter
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Value */}
       <div className="flex-1">
         <input
           ref={valueRef}
-          type={header.key.toLowerCase() === 'authorization' ? 'text' : 'text'}
+          type="text"
           value={header.value}
           onChange={(e) => onUpdate({ value: e.target.value })}
           onKeyDown={(e) => handleKeyDown(e, 'value')}
           placeholder={valuePlaceholder}
+          autoComplete="off"
+          spellCheck={false}
           className="w-full bg-surface-3/30 hover:bg-surface-3/60 focus:bg-surface-3 border border-border/50 focus:border-primary/50 rounded-md px-3 py-1.5 text-xs outline-none text-foreground font-mono transition-all placeholder:text-muted-foreground/40 placeholder:font-sans"
         />
       </div>
 
       {/* Delete */}
-      <div className="w-8 shrink-0 flex justify-center">
+      <div className="w-7 shrink-0 flex justify-center">
         <button
           onClick={onRemove}
-          className="p-1.5 text-muted-foreground/50 hover:text-red-400 hover:bg-red-400/10 rounded-md transition-colors opacity-0 group-hover:opacity-100"
-          title="Remove Header"
+          className="p-1.5 text-muted-foreground/40 hover:text-red-400 hover:bg-red-400/10 rounded-md transition-colors opacity-0 group-hover:opacity-100"
+          title="Remove"
         >
-          <Trash2 className="h-3.5 w-3.5" />
+          <Trash2 className="h-3 w-3" />
         </button>
       </div>
     </div>

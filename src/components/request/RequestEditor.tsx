@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { toast } from 'sonner'
 import { HeadersEditor } from './HeadersEditor'
+import { loadCustomTheme } from '@/lib/monacoThemes'
 
 function getDefaultPort(framework?: string): string {
   switch (framework) {
@@ -60,7 +61,7 @@ function getDefaultPort(framework?: string): string {
 }
 
 export function RequestEditor() {
-  const { selectedRoute, authToken, setAuthToken, requestBody, setRequestBody, isLoading, setIsLoading, setResponse, headers, customURL, setCustomURL, pathParams, setPathParam } = useWorkspaceStore()
+  const { selectedRoute, authToken, setAuthToken, requestBody, setRequestBody, isLoading, setIsLoading, setResponse, headers, customURL, setCustomURL, pathParams, setPathParam, editorTheme, setEditorTheme } = useWorkspaceStore()
   const [showAuth, setShowAuth] = useState(false)
   const [authExpanded, setAuthExpanded] = useState(false)
   const [headersExpanded, setHeadersExpanded] = useState(true)
@@ -73,7 +74,7 @@ export function RequestEditor() {
     setIsLoading(true)
 
     const requestHeaders: Record<string, string> = {}
-    
+
     // Add custom enabled headers first
     headers.forEach(h => {
       if (h.enabled && h.key.trim() !== '') {
@@ -132,6 +133,22 @@ export function RequestEditor() {
     window.addEventListener('keydown', handleKeyDown, { capture: true })
     return () => window.removeEventListener('keydown', handleKeyDown, { capture: true })
   }, [])
+
+  useEffect(() => {
+    if (!editorRef.current) return
+    const urls: Record<string, string> = {
+      'one-dark': '/themes/OneDark-Pro.monaco.json',
+      'bearded': '/themes/Bearded-Theme.monaco.json',
+      'coffee': '/themes/Coffee-Theme.monaco.json'
+    }
+    import('monaco-editor').then(monaco => {
+      if (urls[editorTheme]) {
+        loadCustomTheme(monaco, editorTheme, urls[editorTheme])
+      } else {
+        monaco.editor.setTheme(editorTheme)
+      }
+    })
+  }, [editorTheme])
 
   if (!selectedRoute) return null
 
@@ -210,7 +227,7 @@ export function RequestEditor() {
               <span className="text-xs font-mono text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full">Token Set</span>
             )}
           </button>
-          
+
           <AnimatePresence initial={false}>
             {authExpanded && (
               <motion.div
@@ -259,7 +276,7 @@ export function RequestEditor() {
               {headers.filter(h => h.enabled && h.key).length} active
             </span>
           </button>
-          
+
           <AnimatePresence initial={false}>
             {headersExpanded && (
               <motion.div
@@ -287,9 +304,22 @@ export function RequestEditor() {
               )}
             </div>
             {hasBody && (
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-2">
+                <select 
+                  value={editorTheme}
+                  onChange={(e) => setEditorTheme(e.target.value)}
+                  className="bg-surface-2 border border-border/50 text-xs text-foreground px-2 py-1 rounded outline-none cursor-pointer focus:border-primary/50 transition-colors"
+                >
+                  <option value="testify-dark">Default Theme</option>
+                  <option value="one-dark">One Dark Pro</option>
+                  <option value="bearded">Bearded Theme</option>
+                  <option value="coffee">Coffee Theme</option>
+                </select>
+
+                <div className="w-px h-4 bg-border/50 mx-1"></div>
+
                 <Tooltip>
-                  <TooltipTrigger 
+                  <TooltipTrigger
                     onClick={() => {
                       try {
                         const parsed = JSON.parse(requestBody)
@@ -305,9 +335,9 @@ export function RequestEditor() {
                   </TooltipTrigger>
                   <TooltipContent side="top">Format JSON</TooltipContent>
                 </Tooltip>
-                
+
                 <Tooltip>
-                  <TooltipTrigger 
+                  <TooltipTrigger
                     onClick={() => {
                       setRequestBody('')
                       toast.success('Body cleared')
@@ -321,7 +351,7 @@ export function RequestEditor() {
               </div>
             )}
           </div>
-          
+
           {hasBody ? (
             <div className="flex-1 w-full p-2 bg-surface-2">
               <Editor
@@ -330,7 +360,7 @@ export function RequestEditor() {
                 theme="testify-dark"
                 value={requestBody}
                 onChange={(value) => setRequestBody(value || '')}
-                onMount={(editor, monaco) => { 
+                onMount={(editor, monaco) => {
                   editorRef.current = editor
                   monaco.editor.defineTheme('testify-dark', {
                     base: 'vs-dark',
@@ -340,7 +370,17 @@ export function RequestEditor() {
                       'editor.background': '#161616'
                     }
                   })
-                  monaco.editor.setTheme('testify-dark')
+                  
+                  const urls: Record<string, string> = {
+                    'one-dark': '/themes/OneDark-Pro.monaco.json',
+                    'bearded': '/themes/Bearded-Theme.monaco.json',
+                    'coffee': '/themes/Coffee-Theme.monaco.json'
+                  }
+                  if (urls[editorTheme]) {
+                    loadCustomTheme(monaco, editorTheme, urls[editorTheme])
+                  } else {
+                    monaco.editor.setTheme(editorTheme)
+                  }
                 }}
                 options={{
                   minimap: { enabled: false },
@@ -378,7 +418,7 @@ export function RequestEditor() {
         >
           {/* Subtle sheen effect */}
           <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-          
+
           {isLoading ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />

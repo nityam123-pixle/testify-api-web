@@ -1,0 +1,52 @@
+{
+  "name": "Coffee Theme",
+  "type": "dark",
+  "colors": {
+    "editor.background": "#2c2421",
+    "editor.foreground": "#d4c4b7",
+    "editorCursor.foreground": "#d4c4b7",
+    "editor.lineHighlightBackground": "#3a302c",
+    "editorLineNumber.foreground": "#7a6a61",
+    "editorSelection.background": "#52443d"
+  },
+  "tokenColors": [
+    {
+      "scope": ["keyword", "storage"],
+      "settings": {
+        "foreground": "#e5a170",
+        "fontStyle": "italic"
+      }
+    },
+    {
+      "scope": ["string", "string.quoted"],
+      "settings": {
+        "foreground": "#b4c38f"
+      }
+    },
+    {
+      "scope": ["entity.name.function", "support.function"],
+      "settings": {
+        "foreground": "#f2d184"
+      }
+    },
+    {
+      "scope": ["variable", "variable.parameter"],
+      "settings": {
+        "foreground": "#d4c4b7"
+      }
+    },
+    {
+      "scope": ["constant", "constant.numeric"],
+      "settings": {
+        "foreground": "#de878f"
+      }
+    },
+    {
+      "scope": ["comment"],
+      "settings": {
+        "foreground": "#7a6a61",
+        "fontStyle": "italic"
+      }
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "name": "Bearded Theme",
+  "type": "dark",
+  "colors": {
+    "editor.background": "#1a1c23",
+    "editor.foreground": "#e1e1e6",
+    "editorCursor.foreground": "#ff757f",
+    "editor.lineHighlightBackground": "#282a36",
+    "editorLineNumber.foreground": "#4d5166",
+    "editorSelection.background": "#44475a"
+  },
+  "tokenColors": [
+    {
+      "scope": ["keyword", "storage", "modifier"],
+      "settings": {
+        "foreground": "#c099ff",
+        "fontStyle": "italic"
+      }
+    },
+    {
+      "scope": ["string", "string.quoted"],
+      "settings": {
+        "foreground": "#c3e88d"
+      }
+    },
+    {
+      "scope": ["entity.name.function", "support.function"],
+      "settings": {
+        "foreground": "#82aaff"
+      }
+    },
+    {
+      "scope": ["variable", "variable.parameter"],
+      "settings": {
+        "foreground": "#ffc777"
+      }
+    },
+    {
+      "scope": ["constant", "constant.numeric"],
+      "settings": {
+        "foreground": "#ff966c"
+      }
+    },
+    {
+      "scope": ["comment"],
+      "settings": {
+        "foreground": "#636da6",
+        "fontStyle": "italic"
+      }
+    },
+    {
+      "scope": ["entity.name.tag", "support.class"],
+      "settings": {
+        "foreground": "#ff757f"
+      }
+    },
+    {
+      "scope": ["entity.other.attribute-name"],
+      "settings": {
+        "foreground": "#fca7ea",
+        "fontStyle": "italic"
+      }
+    }
+  ]
+}

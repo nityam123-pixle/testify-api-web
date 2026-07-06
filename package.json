@@ -1,6 +1,6 @@
 {
   "name": "testify-api-web",
-  "version": "1.2.17",
+  "version": "1.2.12",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -12,10 +12,10 @@
     "@base-ui/react": "^1.6.0",
     "@monaco-editor/react": "^4.7.0",
     "@radix-ui/react-dialog": "^1.1.18",
-    "@radix-ui/react-scroll-area": "^1.2.173",
+    "@radix-ui/react-scroll-area": "^1.2.1",
     "@radix-ui/react-separator": "^1.1.11",
     "@radix-ui/react-tabs": "^1.1.16",
-    "@radix-ui/react-tooltip": "^1.2.171",
+    "@radix-ui/react-tooltip": "^1.1.8",
     "@shadcn/react": "^0.2.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -45,6 +45,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
+    "monaco-vscode-textmate-theme-converter": "^0.1.7",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

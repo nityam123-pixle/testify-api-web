@@ -44,6 +44,10 @@ interface WorkspaceStore {
   response: ResponseData | null
   isLoading: boolean
 
+  // Editor settings
+  editorTheme: string
+  setEditorTheme: (theme: string) => void
+
   // Actions
   setConnected: (v: boolean) => void
   setConnecting: (v: boolean) => void
@@ -110,6 +114,10 @@ export const useWorkspaceStore = create<WorkspaceStore>((set) => ({
   // Response state
   response: null,
   isLoading: false,
+
+  // Editor settings
+  editorTheme: 'testify-dark',
+  setEditorTheme: (theme) => set({ editorTheme: theme }),
 
   // Actions
   setConnected: (v) => set({ connected: v }),
